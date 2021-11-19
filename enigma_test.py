@@ -1,16 +1,16 @@
 #https://en.wikipedia.org/wiki/Enigma_rotor_details
 class Rotor:
-    #alphab = ["abcdefghijklmnopqrstuvwxyz"]
-    wirings = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ",
-               "AJDKSIRUXBLHWTMCQGZNPYFVOE",
-               "BDFHJLCPRTXVZNYEIWGAKMUSQO",
-               "ESOVPZJAYQUIRHXLNFTGKDCMWB",
-               "VZBRGITYUPSDNHLXAWMJQOFECK"]
+    # alphab = "abcdefghijklmnopqrstuvwxyz"
+    wirings = [["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q"],    # I + notch
+               ["AJDKSIRUXBLHWTMCQGZNPYFVOE", "E"],    # II
+               ["BDFHJLCPRTXVZNYEIWGAKMUSQO", "V"],    # III
+               ["ESOVPZJAYQUIRHXLNFTGKDCMWB", "J"],    # IV
+               ["VZBRGITYUPSDNHLXAWMJQOFECK", "Z"]]    # V
 
     def __init__(self, number, start_letter):
         self.rotations = ord(start_letter) - 65
-        self.wiring = Rotor.wirings[number-1]
-        self.number = number
+        self.number = number    # rotor I, II, etc.
+        self.wiring = Rotor.wirings[self.number-1][0]
 
     def rotate(self):
         self.rotations = (self.rotations + 1) % 26
@@ -28,25 +28,26 @@ class Rotor:
 
 
 def reflector_get_letter(letter):
-    #alph = ["abcdefghijklmnopqrstuvwxyz"]
+    # alph = "abcdefghijklmnopqrstuvwxyz"
     wiring = "YRUHQSLDPXNGOKMIEBFZCWVJAT"   # German Army & Air force UKW-B (reflector-B) wiring
     letter_num = ord(letter) - 65  # A=0, B=1 ...
     return wiring[letter_num]
 
 
-# rotors = [Rotor(i) for i in range(3)]
+# TODO: 1st letter is accurate if real thing starts on AAZ. 2nd letter is wrong
+# TODO: notch positions
 rotors = [Rotor(3, "A"), Rotor(2, "A"), Rotor(1, "A")]
-rotations = 0
+total_rotations = 0
 
 
 def rotate_rotors():
-    global rotations
+    global total_rotations
     rotors[0].rotate()
-    if rotations % 26 == 0 and rotations != 0:
+    if total_rotations % 26 == 0 and total_rotations != 0:
         rotors[1].rotate()
-    if rotations % 676 == 0 and rotations != 0:
+    if total_rotations % 676 == 0 and total_rotations != 0:
         rotors[2].rotate()
-    rotations += 1
+    total_rotations += 1
 
 
 def check_plugs(letter, plugs):
@@ -74,7 +75,7 @@ def generate_letter(letter):
     print("reflector encoding: ", l4)
     print("4th encoding: ", l5)
     print("5th encoding: ", l6)
-    print("6th encoding: ", l7)
+    print("6th encoding: ", l7, "\n")
     return check_plugs(l7, plugs)
 
 
