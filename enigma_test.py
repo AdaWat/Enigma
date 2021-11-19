@@ -1,3 +1,4 @@
+#https://en.wikipedia.org/wiki/Enigma_rotor_details
 class Rotor:
     #alphab = ["abcdefghijklmnopqrstuvwxyz"]
     wirings = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ",
@@ -6,13 +7,13 @@ class Rotor:
                "ESOVPZJAYQUIRHXLNFTGKDCMWB",
                "VZBRGITYUPSDNHLXAWMJQOFECK"]
 
-    def __init__(self, number):
-        self.rotations = 0
+    def __init__(self, number, start_letter):
+        self.rotations = ord(start_letter) - 65
         self.wiring = Rotor.wirings[number-1]
         self.number = number
 
     def rotate(self):
-        self.rotations = (self.rotations + 1) if self.rotations < 25 else 0
+        self.rotations = (self.rotations + 1) % 26
 
     def get_letter(self, letter):
         letter_num = ord(letter) - 65   # A=0, B=1 ...
@@ -25,11 +26,6 @@ class Rotor:
                 letter_index = (index - self.rotations) % 26    # take into account the rotation of rotor
                 return chr(letter_index + 65)   # return character of the position of the given letter in the wiring
 
-    def set_position(self, position):
-        # position = "B" means the rotor should be rotated once
-        letter_num = ord(position) - 65
-        self.rotations = letter_num
-
 
 def reflector_get_letter(letter):
     #alph = ["abcdefghijklmnopqrstuvwxyz"]
@@ -39,7 +35,7 @@ def reflector_get_letter(letter):
 
 
 # rotors = [Rotor(i) for i in range(3)]
-rotors = [Rotor(3), Rotor(2), Rotor(1)]
+rotors = [Rotor(3, "A"), Rotor(2, "A"), Rotor(1, "A")]
 rotations = 0
 
 
@@ -94,8 +90,7 @@ def set_rotor(i):
         set_rotor(i)
     else:
         print("Using rotor with wirings:", rotors[i].wiring)
-        rotors[i] = Rotor(int(r1))
-        rotors[i].set_position(p1.upper())
+        rotors[i] = Rotor(int(r1), p1.upper())
 
 
 plugs = []
