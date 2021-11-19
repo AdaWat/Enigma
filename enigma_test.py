@@ -11,6 +11,7 @@ class Rotor:
         self.rotations = ord(start_letter) - 65
         self.number = number    # rotor I, II, etc.
         self.wiring = Rotor.wirings[self.number-1][0]
+        self.notch = Rotor.wirings[self.number-1][1]
 
     def rotate(self):
         self.rotations = (self.rotations + 1) % 26
@@ -35,18 +36,20 @@ def reflector_get_letter(letter):
 
 
 # TODO: 1st letter is accurate if real thing starts on AAZ. 2nd letter is wrong
-# TODO: notch positions
-rotors = [Rotor(3, "A"), Rotor(2, "A"), Rotor(1, "A")]
+# TODO: double step
+rotors = [Rotor(3, "A"), Rotor(2, "A"), Rotor(1, "A")]  # displayed backwards ie. I II III
 total_rotations = 0
 
-
+#fahwkjadhskjwabdkwjadhsjkadbwhandbmsafkjebvhkrbsvhrdjgbnrjdgnfdjgrdugkhgsrunejsfbesjkfenskfnkesfens
 def rotate_rotors():
-    global total_rotations
-    rotors[0].rotate()
-    if total_rotations % 26 == 0 and total_rotations != 0:
-        rotors[1].rotate()
-    if total_rotations % 676 == 0 and total_rotations != 0:
-        rotors[2].rotate()
+    global total_rotations, double_step
+    rotors[0].rotate()  # rotate 1st rotor
+    if chr(rotors[0].rotations+65) == chr(ord(rotors[0].notch)+1):
+        rotors[1].rotate()  # rotate 2nd rotor
+    if chr(rotors[1].rotations+65) == chr(ord(rotors[1].notch)-1):
+        rotors[2].rotate()  # rotate 3rd rotor
+        rotors[1].rotate()  # double stepping
+
     total_rotations += 1
 
 
@@ -69,13 +72,14 @@ def generate_letter(letter):
     l6 = rotors[1].get_letter_reversed(l5)
     l7 = rotors[0].get_letter_reversed(l6)
     rotate_rotors()
-    print("1st encoding: ", l1)
-    print("2nd encoding: ", l2)
-    print("3rd encoding: ", l3)
-    print("reflector encoding: ", l4)
-    print("4th encoding: ", l5)
-    print("5th encoding: ", l6)
-    print("6th encoding: ", l7, "\n")
+    # print("1st encoding: ", l1)
+    # print("2nd encoding: ", l2)
+    # print("3rd encoding: ", l3)
+    # print("reflector encoding: ", l4)
+    # print("4th encoding: ", l5)
+    # print("5th encoding: ", l6)
+    # print("6th encoding: ", l7, "\n")
+    print("Rotor positions:", chr(rotors[2].rotations+65), chr(rotors[1].rotations+65), chr(rotors[0].rotations+65))
     return check_plugs(l7, plugs)
 
 
