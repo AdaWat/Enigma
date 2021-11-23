@@ -32,11 +32,10 @@ def reflector_get_letter(letter):
     return wiring[letter_num]
 
 
-# TODO: 1st letter is accurate if real thing starts on AAZ. 2nd letter is wrong
-# TODO: double step
 rotors = [Rotor(3, "A"), Rotor(2, "A"), Rotor(1, "A")]  # displayed backwards ie. I II III
 total_rotations = 0
 double_step = False
+show_details = False
 
 
 def rotate_rotors():
@@ -75,6 +74,7 @@ def keep_alpha(ascii_code):
     else:
         return chr(ascii_code)
 
+
 def generate_letter(letter):
     rotate_rotors()
     l1 = rotors[0].get_letter(letter)
@@ -85,14 +85,15 @@ def generate_letter(letter):
     l6 = rotors[1].get_letter_reversed(keep_alpha(ord(l5) + rotors[1].rotations))
     l7 = rotors[0].get_letter_reversed(keep_alpha(ord(l6) + rotors[0].rotations))
 
-    print("Rotor positions:", chr(rotors[2].rotations+65), chr(rotors[1].rotations+65), chr(rotors[0].rotations+65))
-    print("1st encoding: ", l1)
-    print("2nd encoding: ", l2)
-    print("3rd encoding: ", l3)
-    print("reflector encoding: ", l4)
-    print("4th encoding: ", l5)
-    print("5th encoding: ", l6)
-    print("6th encoding: ", l7, "\n")
+    if show_details:
+        print("Rotor positions:", chr(rotors[2].rotations+65), chr(rotors[1].rotations+65), chr(rotors[0].rotations+65))
+        print("1st encoding: ", l1)
+        print("2nd encoding: ", l2)
+        print("3rd encoding: ", l3)
+        print("reflector encoding: ", l4)
+        print("4th encoding: ", l5)
+        print("5th encoding: ", l6)
+        print("6th encoding: ", l7, "\n")
     return check_plugs(l7, plugs)
 
 
@@ -127,7 +128,8 @@ while True:
               "\nEverything is case-insensitive."
               "\nTo select rotors and their positions, enter \\R"
               "\nTo select the placement of plugs, enter \\P. Only 10 plugs are available."
-              "\nTo reset plugs, enter \\PR"
+              "\nTo reset plugs, enter \\RP"
+              "\nTo show details of each encoding, enter \\SD"
               "\nTo quit, enter \\Q")
 
     elif entered_string == "\\R":
@@ -141,25 +143,38 @@ while True:
             for plug in plugs:
                 print(f"{plug[0]}-{plug[1]}")
 
-        connections = input("Enter letters to connect (in form A-B,C-D,E-F...). 10 plugs max: ").upper().split(",")
+        connections = input("Enter letters to connect (in form A-B,C-D,E-F...). 10 plugs max: ").upper().replace(" ", "").split(",")
         connections = [c.split("-") for c in connections]
         invalid = False
         for c in connections:
-            if len(c) == 2 and c[0].isalpha() and c[1].isalpha():
+            if len(c) == 2 and "".join(c).isalpha():
                 c.sort()  # arrange letters in each plug alphabetically
             else:
                 invalid = True
+                print("Invalid input. Enter connection in form 'A-B,C-D,E-F...' next time")
+                break
+
+            # check for repeated letters
+            for letter in c:
+                for plug in plugs:
+                    if letter in plug:
+                        invalid = True
+                        print(f"Invalid: Letter '{letter}' is already in use.")
+                        break
+
         if not invalid:
             if len(plugs) + len(connections) <= 10:
                 plugs += connections
             else:
-                print("That is too many plugs. You can reset plugs with \\PR")
-        else:
-            print("Invalid input. Enter connection in form 'A-B,C-D,E-F...' next time")
+                print("Invalid: That is too many plugs. You can reset plugs with \\PR")
 
     elif entered_string == "\\PR":
         print("Removing all plugs...")
         plugs.clear()
+
+    elif entered_string == "\\SD":
+        print("Show details mode toggled.")
+        show_details = not show_details
 
     elif entered_string == "\\Q":
         break
