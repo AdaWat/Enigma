@@ -1,6 +1,4 @@
-#https://en.wikipedia.org/wiki/Enigma_rotor_details
 class Rotor:
-    # alphab = "abcdefghijklmnopqrstuvwxyz"
     wirings = [["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q"],    # I + notch
                ["AJDKSIRUXBLHWTMCQGZNPYFVOE", "E"],    # II
                ["BDFHJLCPRTXVZNYEIWGAKMUSQO", "V"],    # III
@@ -29,7 +27,6 @@ class Rotor:
 
 
 def reflector_get_letter(letter):
-    # alph = "abcdefghijklmnopqrstuvwxyz"
     wiring = "YRUHQSLDPXNGOKMIEBFZCWVJAT"   # German Army & Air force UKW-B (reflector-B) wiring
     letter_num = ord(letter) - 65  # A=0, B=1 ...
     return wiring[letter_num]
@@ -39,16 +36,25 @@ def reflector_get_letter(letter):
 # TODO: double step
 rotors = [Rotor(3, "A"), Rotor(2, "A"), Rotor(1, "A")]  # displayed backwards ie. I II III
 total_rotations = 0
+double_step = False
 
-#fahwkjadhskjwabdkwjadhsjkadbwhandbmsafkjebvhkrbsvhrdjgbnrjdgnfdjgrdugkhgsrunejsfbesjkfenskfnkesfens
+
 def rotate_rotors():
     global total_rotations, double_step
     rotors[0].rotate()  # rotate 1st rotor
     if chr(rotors[0].rotations+65) == chr(ord(rotors[0].notch)+1):
         rotors[1].rotate()  # rotate 2nd rotor
-    if chr(rotors[1].rotations+65) == chr(ord(rotors[1].notch)-1):
-        rotors[2].rotate()  # rotate 3rd rotor
-        rotors[1].rotate()  # double stepping
+
+        if chr(rotors[1].rotations+65) == chr(ord(rotors[1].notch)+1):
+            rotors[2].rotate()  # rotate 3rd rotor
+
+    if chr(rotors[1].rotations+65) == rotors[1].notch and not double_step:
+        double_step = True
+
+    elif double_step:
+        rotors[1].rotate()
+        rotors[2].rotate()
+        double_step = False
 
     total_rotations += 1
 
@@ -63,23 +69,30 @@ def check_plugs(letter, plugs):
     return letter
 
 
+def keep_alpha(ascii_code):
+    if ascii_code>90:
+        return chr((ascii_code - 65) % 26 + 65)
+    else:
+        return chr(ascii_code)
+
 def generate_letter(letter):
-    l1 = rotors[0].get_letter(letter)
-    l2 = rotors[1].get_letter(l1)
-    l3 = rotors[2].get_letter(l2)
-    l4 = reflector_get_letter(l3)
-    l5 = rotors[2].get_letter_reversed(l4)
-    l6 = rotors[1].get_letter_reversed(l5)
-    l7 = rotors[0].get_letter_reversed(l6)
     rotate_rotors()
-    # print("1st encoding: ", l1)
-    # print("2nd encoding: ", l2)
-    # print("3rd encoding: ", l3)
-    # print("reflector encoding: ", l4)
-    # print("4th encoding: ", l5)
-    # print("5th encoding: ", l6)
-    # print("6th encoding: ", l7, "\n")
+    l1 = rotors[0].get_letter(letter)
+    l2 = rotors[1].get_letter(chr(ord(l1) - rotors[0].rotations))
+    l3 = rotors[2].get_letter(chr(ord(l2) - rotors[1].rotations))
+    l4 = reflector_get_letter(chr(ord(l3) - rotors[2].rotations))
+    l5 = rotors[2].get_letter_reversed(keep_alpha(ord(l4) + rotors[2].rotations))
+    l6 = rotors[1].get_letter_reversed(keep_alpha(ord(l5) + rotors[1].rotations))
+    l7 = rotors[0].get_letter_reversed(keep_alpha(ord(l6) + rotors[0].rotations))
+
     print("Rotor positions:", chr(rotors[2].rotations+65), chr(rotors[1].rotations+65), chr(rotors[0].rotations+65))
+    print("1st encoding: ", l1)
+    print("2nd encoding: ", l2)
+    print("3rd encoding: ", l3)
+    print("reflector encoding: ", l4)
+    print("4th encoding: ", l5)
+    print("5th encoding: ", l6)
+    print("6th encoding: ", l7, "\n")
     return check_plugs(l7, plugs)
 
 
@@ -111,7 +124,7 @@ while True:
               "\nYou can decode messages by making sure your machine uses the same settings as the one that created the"
               " ciphertext."
               "\nYou can enter multiple letters in one line or enter letters on individual lines. It doesn't matter."
-              "\nEverything is case-insensitive"
+              "\nEverything is case-insensitive."
               "\nTo select rotors and their positions, enter \\R"
               "\nTo select the placement of plugs, enter \\P. Only 10 plugs are available."
               "\nTo reset plugs, enter \\PR"
@@ -162,4 +175,5 @@ while True:
                 show_warning = True
         if show_warning:
             print("Ignoring non-alphabetical characters:")
-        print("".join(output))  # print output as string
+        string_out = "".join(output)
+        print(" ".join(string_out[i:i+5] for i in range(0, len(string_out), 5)))  # print output as string
