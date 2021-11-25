@@ -5,25 +5,26 @@ class Rotor:
                ["ESOVPZJAYQUIRHXLNFTGKDCMWB", "J"],    # IV
                ["VZBRGITYUPSDNHLXAWMJQOFECK", "Z"]]    # V
 
-    def __init__(self, number, start_letter):
+    def __init__(self, number, start_letter, ring_setting):
         self.rotations = ord(start_letter) - 65
-        self.number = number    # rotor I, II, etc.
+        self.number = number    # rotor 1, 2, etc.
+        self.roman_number = "I" * self.number if 1 <= self.number <= 3 else "IV" if self.number == 4 else "V"
         self.wiring = Rotor.wirings[self.number-1][0]
         self.notch = Rotor.wirings[self.number-1][1]
-        self.roman_number = "I"*self.number if 1<= self.number <= 3 else "IV" if self.number == 4 else "V"
+        self.ring_setting = ord(ring_setting) - 65
 
     def rotate(self):
         self.rotations = (self.rotations + 1) % 26
 
     def get_letter(self, letter):
         letter_num = ord(letter) - 65   # A=0, B=1 ...
-        return self.wiring[(letter_num + self.rotations) % 26]
+        return self.wiring[(letter_num + self.rotations + self.ring_setting) % 26]
 
     def get_letter_reversed(self, letter):
         # get the position of given letter in this rotor's wiring
         for index, char in enumerate(self.wiring):
             if char == letter.upper():
-                letter_index = (index - self.rotations) % 26    # take into account the rotation of rotor
+                letter_index = (index - self.rotations - self.ring_setting) % 26    # take into account the rotation of rotor
                 return chr(letter_index + 65)   # return character of the position of the given letter in the wiring
 
 
@@ -32,8 +33,8 @@ def reflector_get_letter(letter):
     letter_num = ord(letter) - 65  # A=0, B=1 ...
     return wiring[letter_num]
 
-
-rotors = [Rotor(3, "A"), Rotor(2, "A"), Rotor(1, "A")]  # displayed backwards ie. I II III
+#TODO ring setting
+rotors = [Rotor(3, "A", "A"), Rotor(2, "A", "A"), Rotor(1, "A", "B")]  # displayed backwards ie. I II III
 total_rotations = 0
 double_step = False
 show_details = False
@@ -44,7 +45,6 @@ def keep_alpha(ascii_code):
         return chr((ascii_code - 65) % 26 + 65)
     else:
         return chr(ascii_code)
-
 
 
 def rotate_rotors():
@@ -78,7 +78,7 @@ def check_plugs(letter, plugs):
 
 
 def generate_letter(letter):
-    rotate_rotors()
+    rotate_rotors()     # rotate rotors before key is pressed
     l1 = rotors[0].get_letter(letter)
     l2 = rotors[1].get_letter(keep_alpha(ord(l1) - rotors[0].rotations))
     l3 = rotors[2].get_letter(keep_alpha(ord(l2) - rotors[1].rotations))
@@ -96,6 +96,7 @@ def generate_letter(letter):
         print("4th encoding: ", l5)
         print("5th encoding: ", l6)
         print("6th encoding: ", l7, "\n")
+
     return check_plugs(l7, plugs)
 
 
@@ -116,7 +117,7 @@ def set_rotor(i):
 
 plugs = []
 
-print("The Enigma I simulator. Enter \\I for instructions.")
+print("The Enigma I simulator. Enter \\HELP for instructions.")
 print(f"Rotors => {rotors[2].roman_number}: {keep_alpha(rotors[2].rotations+65)}"
       f" {rotors[1].roman_number}: {keep_alpha(rotors[1].rotations+65)}"
       f" {rotors[0].roman_number}: {keep_alpha(rotors[0].rotations+65)}")
@@ -124,8 +125,8 @@ print(f"Rotors => {rotors[2].roman_number}: {keep_alpha(rotors[2].rotations+65)}
 while True:
     entered_string = input().upper()
 
-    if entered_string == "\\I":
-        print("="*3, "Instructions", "="*3,
+    if entered_string == "\\HELP":
+        print("="*3, "Instructions", 3*"=",
               "\nThe Enigma machine uses rotors and plugs to encipher plaintext to ciphertext."
               "\nYou can decode messages by making sure your machine uses the same settings as the one that created the"
               " ciphertext."
@@ -196,4 +197,4 @@ while True:
         if show_warning:
             print("Ignoring non-alphabetical characters:")
         string_out = "".join(output)
-        print(" ".join(string_out[i:i+5] for i in range(0, len(string_out), 5)))  # print with 5 letter blocks
+        print(" ".join(string_out[i:i+5] for i in range(0, len(string_out), 5)))  # print output in 5 letter blocks
