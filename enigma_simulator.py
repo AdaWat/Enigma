@@ -10,6 +10,7 @@ class Rotor:
         self.number = number    # rotor I, II, etc.
         self.wiring = Rotor.wirings[self.number-1][0]
         self.notch = Rotor.wirings[self.number-1][1]
+        self.roman_number = "I"*self.number if 1<= self.number <= 3 else "IV" if self.number == 4 else "V"
 
     def rotate(self):
         self.rotations = (self.rotations + 1) % 26
@@ -38,16 +39,24 @@ double_step = False
 show_details = False
 
 
+def keep_alpha(ascii_code):
+    if ascii_code>90:
+        return chr((ascii_code - 65) % 26 + 65)
+    else:
+        return chr(ascii_code)
+
+
+
 def rotate_rotors():
     global total_rotations, double_step
     rotors[0].rotate()  # rotate 1st rotor
-    if chr(rotors[0].rotations+65) == chr(ord(rotors[0].notch)+1):
+    if keep_alpha(rotors[0].rotations+65) == keep_alpha(ord(rotors[0].notch)+1):
         rotors[1].rotate()  # rotate 2nd rotor
 
-        if chr(rotors[1].rotations+65) == chr(ord(rotors[1].notch)+1):
+        if keep_alpha(rotors[1].rotations+65) == keep_alpha(ord(rotors[1].notch)+1):
             rotors[2].rotate()  # rotate 3rd rotor
 
-    if chr(rotors[1].rotations+65) == rotors[1].notch and not double_step:
+    if keep_alpha(rotors[1].rotations+65) == rotors[1].notch and not double_step:
         double_step = True
 
     elif double_step:
@@ -68,25 +77,18 @@ def check_plugs(letter, plugs):
     return letter
 
 
-def keep_alpha(ascii_code):
-    if ascii_code>90:
-        return chr((ascii_code - 65) % 26 + 65)
-    else:
-        return chr(ascii_code)
-
-
 def generate_letter(letter):
     rotate_rotors()
     l1 = rotors[0].get_letter(letter)
-    l2 = rotors[1].get_letter(chr(ord(l1) - rotors[0].rotations))
-    l3 = rotors[2].get_letter(chr(ord(l2) - rotors[1].rotations))
-    l4 = reflector_get_letter(chr(ord(l3) - rotors[2].rotations))
+    l2 = rotors[1].get_letter(keep_alpha(ord(l1) - rotors[0].rotations))
+    l3 = rotors[2].get_letter(keep_alpha(ord(l2) - rotors[1].rotations))
+    l4 = reflector_get_letter(keep_alpha(ord(l3) - rotors[2].rotations))
     l5 = rotors[2].get_letter_reversed(keep_alpha(ord(l4) + rotors[2].rotations))
     l6 = rotors[1].get_letter_reversed(keep_alpha(ord(l5) + rotors[1].rotations))
     l7 = rotors[0].get_letter_reversed(keep_alpha(ord(l6) + rotors[0].rotations))
 
     if show_details:
-        print("Rotor positions:", chr(rotors[2].rotations+65), chr(rotors[1].rotations+65), chr(rotors[0].rotations+65))
+        print("Rotor positions:", keep_alpha(rotors[2].rotations+65), keep_alpha(rotors[1].rotations+65), keep_alpha(rotors[0].rotations+65))
         print("1st encoding: ", l1)
         print("2nd encoding: ", l2)
         print("3rd encoding: ", l3)
@@ -115,6 +117,9 @@ def set_rotor(i):
 plugs = []
 
 print("The Enigma I simulator. Enter \\I for instructions.")
+print(f"Rotors => {rotors[2].roman_number}: {keep_alpha(rotors[2].rotations+65)}"
+      f" {rotors[1].roman_number}: {keep_alpha(rotors[1].rotations+65)}"
+      f" {rotors[0].roman_number}: {keep_alpha(rotors[0].rotations+65)}")
 
 while True:
     entered_string = input().upper()
@@ -191,4 +196,4 @@ while True:
         if show_warning:
             print("Ignoring non-alphabetical characters:")
         string_out = "".join(output)
-        print(" ".join(string_out[i:i+5] for i in range(0, len(string_out), 5)))  # print output as string
+        print(" ".join(string_out[i:i+5] for i in range(0, len(string_out), 5)))  # print with 5 letter blocks
