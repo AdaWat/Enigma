@@ -1,4 +1,12 @@
+def keep_alpha(ascii_code):
+    if ascii_code>90:
+        return chr((ascii_code - 65) % 26 + 65)
+    else:
+        return chr(ascii_code)
+
+
 class Rotor:
+    # alphab = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
     wirings = [["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q"],    # I + notch
                ["AJDKSIRUXBLHWTMCQGZNPYFVOE", "E"],    # II
                ["BDFHJLCPRTXVZNYEIWGAKMUSQO", "V"],    # III
@@ -18,13 +26,14 @@ class Rotor:
 
     def get_letter(self, letter):
         letter_num = ord(letter) - 65   # A=0, B=1 ...
-        return self.wiring[(letter_num + self.rotations + self.ring_setting) % 26]
+        return keep_alpha(ord(self.wiring[(letter_num + self.rotations) % 26]) + self.ring_setting)
 
     def get_letter_reversed(self, letter):
         # get the position of given letter in this rotor's wiring
+        letter = keep_alpha(ord(letter.upper()) - self.ring_setting)
         for index, char in enumerate(self.wiring):
-            if char == letter.upper():
-                letter_index = (index - self.rotations - self.ring_setting) % 26    # take into account the rotation of rotor
+            if char == letter:
+                letter_index = (index - self.rotations) % 26    # take into account the rotation of rotor
                 return chr(letter_index + 65)   # return character of the position of the given letter in the wiring
 
 
@@ -34,17 +43,10 @@ def reflector_get_letter(letter):
     return wiring[letter_num]
 
 #TODO ring setting
-rotors = [Rotor(3, "A", "A"), Rotor(2, "A", "A"), Rotor(1, "A", "B")]  # displayed backwards ie. I II III
+rotors = [Rotor(3, "Z", "B"), Rotor(2, "A", "A"), Rotor(1, "A", "A")]  # displayed backwards ie. I II III
 total_rotations = 0
 double_step = False
 show_details = False
-
-
-def keep_alpha(ascii_code):
-    if ascii_code>90:
-        return chr((ascii_code - 65) % 26 + 65)
-    else:
-        return chr(ascii_code)
 
 
 def rotate_rotors():
@@ -79,25 +81,25 @@ def check_plugs(letter, plugs):
 
 def generate_letter(letter):
     rotate_rotors()     # rotate rotors before key is pressed
-    l1 = rotors[0].get_letter(letter)
-    l2 = rotors[1].get_letter(keep_alpha(ord(l1) - rotors[0].rotations))
-    l3 = rotors[2].get_letter(keep_alpha(ord(l2) - rotors[1].rotations))
-    l4 = reflector_get_letter(keep_alpha(ord(l3) - rotors[2].rotations))
-    l5 = rotors[2].get_letter_reversed(keep_alpha(ord(l4) + rotors[2].rotations))
-    l6 = rotors[1].get_letter_reversed(keep_alpha(ord(l5) + rotors[1].rotations))
-    l7 = rotors[0].get_letter_reversed(keep_alpha(ord(l6) + rotors[0].rotations))
+    r1 = rotors[0].get_letter(letter)
+    r2 = rotors[1].get_letter(keep_alpha(ord(r1) - rotors[0].rotations))
+    r3 = rotors[2].get_letter(keep_alpha(ord(r2) - rotors[1].rotations))
+    r4 = reflector_get_letter(keep_alpha(ord(r3) - rotors[2].rotations))
+    r5 = rotors[2].get_letter_reversed(keep_alpha(ord(r4) + rotors[2].rotations))
+    r6 = rotors[1].get_letter_reversed(keep_alpha(ord(r5) + rotors[1].rotations))
+    r7 = rotors[0].get_letter_reversed(keep_alpha(ord(r6) + rotors[0].rotations))
 
     if show_details:
         print("Rotor positions:", keep_alpha(rotors[2].rotations+65), keep_alpha(rotors[1].rotations+65), keep_alpha(rotors[0].rotations+65))
-        print("1st encoding: ", l1)
-        print("2nd encoding: ", l2)
-        print("3rd encoding: ", l3)
-        print("reflector encoding: ", l4)
-        print("4th encoding: ", l5)
-        print("5th encoding: ", l6)
-        print("6th encoding: ", l7, "\n")
+        print("1st encoding: ", r1)
+        print("2nd encoding: ", r2)
+        print("3rd encoding: ", r3)
+        print("reflector encoding: ", r4)
+        print("4th encoding: ", r5)
+        print("5th encoding: ", r6)
+        print("6th encoding: ", r7, "\n")
 
-    return check_plugs(l7, plugs)
+    return check_plugs(r7, plugs)
 
 
 def set_rotor(i):
