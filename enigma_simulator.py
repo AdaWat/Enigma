@@ -119,7 +119,7 @@ def set_rotor(i):
         print("That rotor has already been used. Repeating...\n")
         set_rotor(i)
     else:
-        print("Using rotor with wirings:", rotors[i].wiring)
+        print("Using rotor with wirings:", rotors[i].wiring, "\n")
         rotors[i] = Rotor(int(r1), p1.upper(), rs.upper())
 
 
