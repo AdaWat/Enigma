@@ -142,7 +142,7 @@ while True:
               "\nTo select the placement of plugs, enter \\P. Only 10 plugs are available."
               "\nTo reset plugs, enter \\RP"
               "\nTo show details of each encoding, enter \\SD"
-              "\nTo quit, enter \\Q")
+              "\nTo quit, enter \\QUIT")
 
     elif entered_string == "\\R":
         print("Slots go from right to left (slot 1 is right-most rotor)")
@@ -188,7 +188,7 @@ while True:
         print("Show details mode toggled.")
         show_details = not show_details
 
-    elif entered_string == "\\Q":
+    elif entered_string == "\\QUIT":
         break
 
     else:
