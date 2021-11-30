@@ -125,7 +125,7 @@ def set_rotor(i):
 
 plugs = []
 
-print("The Enigma I simulator. Enter \\HELP for instructions.")
+print("The Enigma I simulator by Adam Watney. Enter \\HELP for instructions.")
 
 while True:
     entered_string = input().upper()
