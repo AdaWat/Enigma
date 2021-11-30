@@ -108,7 +108,7 @@ def generate_letter(letter):
 
 
 def set_rotor(i):
-    r1 = input(f"Enter number of rotor (1-5) in slot {i+1}: ")
+    r1 = input(f"Enter number of rotor in slot {i+1} (1-5): ")
     p1 = input(f"Enter position of rotor in slot {i+1} (A-Z): ")
     rs = input(f"Enter ring setting of rotor in slot {i+1} (A-Z): ")
 
