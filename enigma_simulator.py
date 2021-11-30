@@ -180,7 +180,7 @@ while True:
             else:
                 print("Invalid: That is too many plugs. You can reset plugs with \\PR")
 
-    elif entered_string == "\\PR":
+    elif entered_string == "\\RP":
         print("Removing all plugs...")
         plugs.clear()
 
