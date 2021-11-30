@@ -126,9 +126,6 @@ def set_rotor(i):
 plugs = []
 
 print("The Enigma I simulator. Enter \\HELP for instructions.")
-print(f"Rotors => {rotors[2].roman_number}: {keep_alpha(rotors[2].rotations+65)}"
-      f" {rotors[1].roman_number}: {keep_alpha(rotors[1].rotations+65)}"
-      f" {rotors[0].roman_number}: {keep_alpha(rotors[0].rotations+65)}")
 
 while True:
     entered_string = input().upper()
@@ -140,7 +137,8 @@ while True:
               " ciphertext."
               "\nYou can enter multiple letters in one line or enter letters on individual lines. It doesn't matter."
               "\nEverything is case-insensitive."
-              "\nTo select rotors and their positions, enter \\R"
+              "\nTo select rotors, their positions and their ring settings, enter \\R"
+              "\nThe default setting inputs are: 3 A A, 2 A A, 1 A A"
               "\nTo select the placement of plugs, enter \\P. Only 10 plugs are available."
               "\nTo reset plugs, enter \\RP"
               "\nTo show details of each encoding, enter \\SD"
