@@ -1,12 +1,11 @@
 def keep_alpha(ascii_code):
-    if ascii_code>90:
+    if ascii_code > 90:
         return chr((ascii_code - 65) % 26 + 65)
     else:
         return chr(ascii_code)
 
 
 class Rotor:
-    # alphab = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
     wirings = [["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q"],    # I + notch
                ["AJDKSIRUXBLHWTMCQGZNPYFVOE", "E"],    # II
                ["BDFHJLCPRTXVZNYEIWGAKMUSQO", "V"],    # III
@@ -17,20 +16,26 @@ class Rotor:
         self.rotations = ord(start_letter) - 65
         self.number = number    # rotor 1, 2, etc.
         self.roman_number = "I" * self.number if 1 <= self.number <= 3 else "IV" if self.number == 4 else "V"
-        self.wiring = Rotor.wirings[self.number-1][0]
         self.notch = Rotor.wirings[self.number-1][1]
         self.ring_setting = ord(ring_setting) - 65
+
+        # shift letters in wiring alphabetically according to ring setting
+        temp_wiring = ""
+        for index, letter in enumerate(Rotor.wirings[self.number-1][0]):
+            temp_wiring += keep_alpha(ord(letter) + self.ring_setting)
+        # shift letters along by the ring setting
+        self.wiring = temp_wiring[-self.ring_setting:] + temp_wiring[:-self.ring_setting]
 
     def rotate(self):
         self.rotations = (self.rotations + 1) % 26
 
     def get_letter(self, letter):
         letter_num = ord(letter) - 65   # A=0, B=1 ...
-        return keep_alpha(ord(self.wiring[(letter_num + self.rotations) % 26]) + self.ring_setting)
+        return self.wiring[(letter_num + self.rotations) % 26]
 
     def get_letter_reversed(self, letter):
         # get the position of given letter in this rotor's wiring
-        letter = keep_alpha(ord(letter.upper()) - self.ring_setting)
+        letter = letter.upper()
         for index, char in enumerate(self.wiring):
             if char == letter:
                 letter_index = (index - self.rotations) % 26    # take into account the rotation of rotor
@@ -42,8 +47,8 @@ def reflector_get_letter(letter):
     letter_num = ord(letter) - 65  # A=0, B=1 ...
     return wiring[letter_num]
 
-#TODO ring setting
-rotors = [Rotor(3, "Z", "B"), Rotor(2, "A", "A"), Rotor(1, "A", "A")]  # displayed backwards ie. I II III
+# set default rotor settings
+rotors = [Rotor(3, "A", "A"), Rotor(2, "A", "A"), Rotor(1, "A", "A")]  # displayed backwards ie. I II III
 total_rotations = 0
 double_step = False
 show_details = False
@@ -105,8 +110,9 @@ def generate_letter(letter):
 def set_rotor(i):
     r1 = input(f"Enter number of rotor (1-5) in slot {i+1}: ")
     p1 = input(f"Enter position of rotor in slot {i+1} (A-Z): ")
+    rs = input(f"Enter ring setting of rotor in slot {i+1} (A-Z): ")
 
-    if not r1.isnumeric() or int(r1) < 1 or int(r1) > 5 or not p1.isalpha() or len(p1) != 1:
+    if not r1.isnumeric() or int(r1) < 1 or int(r1) > 5 or not p1.isalpha() or len(p1) != 1 or not rs.isalpha() or len(rs) != 1:
         print("Invalid input. Repeating...\n")
         set_rotor(i)
     elif (i != 0 and rotors[i-1].number == int(r1)) or (i != 0 and rotors[i-2].number == int(r1)):
@@ -114,7 +120,7 @@ def set_rotor(i):
         set_rotor(i)
     else:
         print("Using rotor with wirings:", rotors[i].wiring)
-        rotors[i] = Rotor(int(r1), p1.upper())
+        rotors[i] = Rotor(int(r1), p1.upper(), rs.upper())
 
 
 plugs = []
