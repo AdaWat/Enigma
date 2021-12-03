@@ -188,7 +188,7 @@ while True:
         print("Show details mode toggled.")
         show_details = not show_details
 
-    elif entered_string == "\\QUIT":
+    elif entered_string == "\\QUIT" or entered_string == "\\EXIT":
         break
 
     else:
