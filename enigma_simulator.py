@@ -47,11 +47,12 @@ def reflector_get_letter(letter):
     letter_num = ord(letter) - 65  # A=0, B=1 ...
     return wiring[letter_num]
 
+
 # set default rotor settings
 rotors = [Rotor(3, "A", "A"), Rotor(2, "A", "A"), Rotor(1, "A", "A")]  # displayed backwards ie. I II III
 total_rotations = 0
 double_step = False
-show_details = False
+show_details_global = False
 
 
 def rotate_rotors():
@@ -94,7 +95,7 @@ def generate_letter(letter):
     r6 = rotors[1].get_letter_reversed(keep_alpha(ord(r5) + rotors[1].rotations))
     r7 = rotors[0].get_letter_reversed(keep_alpha(ord(r6) + rotors[0].rotations))
 
-    if show_details:
+    if show_details_global:
         print("Rotor positions:", keep_alpha(rotors[2].rotations+65), keep_alpha(rotors[1].rotations+65), keep_alpha(rotors[0].rotations+65))
         print("1st encoding: ", r1)
         print("2nd encoding: ", r2)
@@ -104,7 +105,7 @@ def generate_letter(letter):
         print("5th encoding: ", r6)
         print("6th encoding: ", r7, "\n")
 
-    return check_plugs(r7, plugs)
+    return check_plugs(r7, plugs_global)
 
 
 def set_rotor(i):
@@ -123,84 +124,86 @@ def set_rotor(i):
         rotors[i] = Rotor(int(r1), p1.upper(), rs.upper())
 
 
-plugs = []
+def main(plugs, show_details):
+    while True:
+        entered_string = input().upper()
+        if entered_string == "\\HELP":
+            print("="*3, "Instructions", 3*"=",
+                  "\nThe Enigma machine uses rotors and plugs to encipher plaintext to ciphertext."
+                  "\nYou can decode messages by making sure your machine uses the same settings as the one that created the"
+                  " ciphertext."
+                  "\nYou can enter multiple letters in one line or enter letters on individual lines. It doesn't matter."
+                  "\nEverything is case-insensitive."
+                  "\nTo select rotors, their positions and their ring settings, enter \\R"
+                  "\nThe default setting inputs are: 3 A A, 2 A A, 1 A A"
+                  "\nTo select the placement of plugs, enter \\P. Only 10 plugs are available."
+                  "\nTo reset plugs, enter \\RP"
+                  "\nTo show details of each encoding, enter \\SD"
+                  "\nTo quit, enter \\QUIT")
 
-print("The Enigma I simulator by Adam Watney. Enter \\HELP for instructions.")
+        elif entered_string == "\\R":
+            print("Slots go from right to left (slot 1 is right-most rotor)")
+            for i in range(len(rotors)):
+                set_rotor(i)
 
-while True:
-    entered_string = input().upper()
-
-    if entered_string == "\\HELP":
-        print("="*3, "Instructions", 3*"=",
-              "\nThe Enigma machine uses rotors and plugs to encipher plaintext to ciphertext."
-              "\nYou can decode messages by making sure your machine uses the same settings as the one that created the"
-              " ciphertext."
-              "\nYou can enter multiple letters in one line or enter letters on individual lines. It doesn't matter."
-              "\nEverything is case-insensitive."
-              "\nTo select rotors, their positions and their ring settings, enter \\R"
-              "\nThe default setting inputs are: 3 A A, 2 A A, 1 A A"
-              "\nTo select the placement of plugs, enter \\P. Only 10 plugs are available."
-              "\nTo reset plugs, enter \\RP"
-              "\nTo show details of each encoding, enter \\SD"
-              "\nTo quit, enter \\QUIT")
-
-    elif entered_string == "\\R":
-        print("Slots go from right to left (slot 1 is right-most rotor)")
-        for i in range(len(rotors)):
-            set_rotor(i)
-
-    elif entered_string == "\\P":
-        if plugs:  # show all plugs
-            print("Current plugs:")
-            for plug in plugs:
-                print(f"{plug[0]}-{plug[1]}")
-
-        connections = input("Enter letters to connect (in form A-B,C-D,E-F...). 10 plugs max: ").upper().replace(" ", "").split(",")
-        connections = [c.split("-") for c in connections]
-        invalid = False
-        for c in connections:
-            if len(c) == 2 and "".join(c).isalpha():
-                c.sort()  # arrange letters in each plug alphabetically
-            else:
-                invalid = True
-                print("Invalid input. Enter connection in form 'A-B,C-D,E-F...' next time")
-                break
-
-            # check for repeated letters
-            for letter in c:
+        elif entered_string == "\\P":
+            if plugs:  # show all plugs
+                print("Current plugs:")
                 for plug in plugs:
-                    if letter in plug:
-                        invalid = True
-                        print(f"Invalid: Letter '{letter}' is already in use.")
-                        break
+                    print(f"{plug[0]}-{plug[1]}")
 
-        if not invalid:
-            if len(plugs) + len(connections) <= 10:
-                plugs += connections
-            else:
-                print("Invalid: That is too many plugs. You can reset plugs with \\PR")
+            connections = input("Enter letters to connect (in form A-B,C-D,E-F...). 10 plugs max: ").upper().replace(" ", "").split(",")
+            connections = [c.split("-") for c in connections]
+            invalid = False
+            for c in connections:
+                if len(c) == 2 and "".join(c).isalpha():
+                    c.sort()  # arrange letters in each plug alphabetically
+                else:
+                    invalid = True
+                    print("Invalid input. Enter connection in form 'A-B,C-D,E-F...' next time")
+                    break
 
-    elif entered_string == "\\RP":
-        print("Removing all plugs...")
-        plugs.clear()
+                # check for repeated letters
+                for letter in c:
+                    for plug in plugs:
+                        if letter in plug:
+                            invalid = True
+                            print(f"Invalid: Letter '{letter}' is already in use.")
+                            break
 
-    elif entered_string == "\\SD":
-        print("Show details mode toggled.")
-        show_details = not show_details
+            if not invalid:
+                if len(plugs) + len(connections) <= 10:
+                    plugs += connections
+                else:
+                    print("Invalid: That is too many plugs. You can reset plugs with \\PR")
 
-    elif entered_string == "\\QUIT" or entered_string == "\\EXIT":
-        break
+        elif entered_string == "\\RP":
+            print("Removing all plugs...")
+            plugs.clear()
 
-    else:
-        output = []
-        show_warning = False
-        for char in entered_string:
-            if char.isalpha():
-                swapped_char = check_plugs(char, plugs)
-                output.append(generate_letter(swapped_char))
-            else:
-                show_warning = True
-        if show_warning:
-            print("Ignoring non-alphabetical characters:")
-        string_out = "".join(output)
-        print(" ".join(string_out[i:i+5] for i in range(0, len(string_out), 5)))  # print output in 5 letter blocks
+        elif entered_string == "\\SD":
+            print("Show details mode toggled.")
+            show_details = not show_details
+
+        elif entered_string == "\\QUIT" or entered_string == "\\EXIT":
+            break
+
+        else:
+            output = []
+            show_warning = False
+            for char in entered_string:
+                if char.isalpha():
+                    swapped_char = check_plugs(char, plugs)
+                    output.append(generate_letter(swapped_char))
+                else:
+                    show_warning = True
+            if show_warning:
+                print("Ignoring non-alphabetical characters:")
+            string_out = "".join(output)
+            print(" ".join(string_out[i:i+5] for i in range(0, len(string_out), 5)))  # print output in 5 letter blocks
+
+
+plugs_global = []
+if __name__ == "__main__":
+    print("The Enigma I simulator by Adam Watney. Enter \\HELP for instructions.")
+    main(plugs_global, show_details_global)
